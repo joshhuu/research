@@ -1,3 +1,6 @@
 \env 
 .env
 \papers
+backend/__pycache__/
+
+*.py[cod]
