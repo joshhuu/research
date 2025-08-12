@@ -5,12 +5,20 @@ from downloader import download_paper
 from session import Session
 from config import MAX_RESULTS_PER_PAGE
 
-def print_papers(papers, session):
+def print_papers(papers, session, summary_cache):
     for i, paper in enumerate(papers, 1):
         selected_mark = "[*]" if session.is_selected(paper['link']) else "[ ]"
+        # Use cached summary if available, else fetch and cache it
+        if paper['link'] in summary_cache:
+            quick_sum = summary_cache[paper['link']]
+        else:
+            quick_sum = summarize_abstract(paper["summary"], quick=True)
+            summary_cache[paper['link']] = quick_sum
+        
         print(f"{selected_mark} {i}. {paper['title']}")
-        quick_sum = summarize_abstract(paper["summary"], quick=True)
         print(f"    Quick summary: {quick_sum}\n")
+
+summary_cache = {}
 
 def print_selected(session):
     selected = session.list_selected()
@@ -49,7 +57,7 @@ def cli_loop():
 
         papers = session.get_papers(session.current_page)
         print(f"\n--- Page {session.current_page + 1} ---")
-        print_papers(papers, session)
+        print_papers(papers, session, summary_cache)
 
         print("Commands:")
         print("  select <num1,num2,...>   - Select papers by numbers")
